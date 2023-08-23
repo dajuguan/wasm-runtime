@@ -1,2 +1,2 @@
 # wasm-runtime
-wasm-runtime test
+requirement: node.js version >=20.5.1

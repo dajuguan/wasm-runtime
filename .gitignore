@@ -132,3 +132,4 @@ dist
 
 # wasm
 *.wat
+*.wasm

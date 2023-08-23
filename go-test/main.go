@@ -1,5 +1,7 @@
 package main
 
+import "fmt"
+
 func main() {
-	println("Hello, es node!")
+	fmt.Println("Hello, es node!")
 }
