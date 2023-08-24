@@ -35,7 +35,7 @@ func main() {
 	pHostRW.Write([]byte("Hello,world!!!"))
 
 	ctx := context.Background()
-	parts := strings.Fields("node ../wasm-lib/main.js /root/now/wasm-runtime/go-test/cmd/client.wasm")
+	parts := strings.Fields("node ../wasm-lib/main.js /root/now/wasm-runtime/go-test/client/cmd/client.wasm")
 	// parts := strings.Fields("wasmtime --mapdir=/tmp::/root/test /root/now/wasm-runtime/go-test/cmd/client.wasi")
 	// parts := strings.Fields("/root/now/wasm-runtime/go-test/cmd/client.exe")
 	cmd := exec.CommandContext(ctx, parts[0], parts[1:]...)
