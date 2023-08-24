@@ -15,8 +15,8 @@ import { argv, env } from 'node:process';
     },
   });
   const wasm = await WebAssembly.compile(
-    // await readFile(new URL('./demo.wasm', import.meta.url)),
-    await readFile(new URL('/root/now/wasm-runtime/go-test/main.wasi', import.meta.url)),
+    await readFile(new URL('/root/now/wasm-runtime/go-test/cmd/client.wasi', import.meta.url)),
+    // await readFile(new URL('/root/now/optimism/op-program/bin/op-program-client.wasi', import.meta.url)),
   );
   const instance = await WebAssembly.instantiate(wasm, wasi.getImportObject());
   

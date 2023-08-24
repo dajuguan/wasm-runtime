@@ -133,3 +133,4 @@ dist
 # wasm
 *.wat
 *.wasm
+go-test/main.wasm
