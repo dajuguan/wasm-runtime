@@ -297,6 +297,24 @@ import fs from "fs";
 					},
 				},
 				env: {
+					//func getKeyFromOracle() []byte
+					"getKeyFromOracle": () => {
+						let reader = fs.createReadStream(null,{fd:5})
+						// Read and display the file data on console
+						reader.on('data', function (chunk) {
+							console.log("get data from node:",chunk.toString());
+						});
+						return 23456
+						// return Buffer.from("Hello golang", 'utf8')
+						// return [
+						// 	83, 111, 109, 101, 32, 116, 101, 120, 116, 32, 104, 101, 114, 101, 46,  46,  46
+						//  ]
+						// data =  fs.readFileSync(5)
+						// console.log("read data from ---------->", data)
+						// return data
+						
+					},
+
 					// func ticks() float64
 					"runtime.ticks": () => {
 						return timeOrigin + performance.now();
