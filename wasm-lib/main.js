@@ -348,6 +348,21 @@ import fs from "fs";
 					
 					},
 
+					"hint_oracle": (retBufPtr, retBufSize) => {
+						//load hintstr
+						console.log("retBufPtr",retBufPtr)
+						console.log("retBufSize",retBufSize)
+						let hintArr = loadSlice(retBufPtr,retBufSize)
+						console.log("hintArr:",hintArr)
+						console.log("hintStr:::",Buffer.from(hintArr))
+						console.log("hintStr:::",Buffer.from(hintArr).toString())
+						
+						//write hint to file descriptor
+						let HClientWFd = 4
+						let number = fs.writeSync(HClientWFd, Buffer.from(hintArr))
+						console.log("write hint to host server:", number)
+					},
+
 					// func ticks() float64
 					"runtime.ticks": () => {
 						return timeOrigin + performance.now();
