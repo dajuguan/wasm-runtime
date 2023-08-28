@@ -8,6 +8,7 @@ import (
 	"io"
 	"os"
 	"sync"
+	"unsafe"
 
 	"go.wasm.test/client"
 )
@@ -32,6 +33,17 @@ func main() {
 
 	wg.Wait()
 
+}
+
+//export get_random_string
+func getRandomStringRaw(retBufPtr **byte, retBufSize *int)
+
+// Get random string from the hosts.
+func getRandomString() string {
+	var bufPtr *byte
+	var bufSize int
+	getRandomStringRaw(&bufPtr, &bufSize)
+	return unsafe.String(bufPtr, bufSize)
 }
 
 // func main() {  //it's ok

@@ -248,6 +248,7 @@ import fs from "fs";
 			}
 
 			const timeOrigin = Date.now() - performance.now();
+			let _this = this;
 			this.importObject = {
 				wasi_snapshot_preview1: {
 					// https://github.com/WebAssembly/WASI/blob/main/phases/snapshot/docs.md#fd_write
@@ -297,22 +298,27 @@ import fs from "fs";
 					},
 				},
 				env: {
+					//get_random_string
+					"get_random_string": (retBufPtr, retBufSize) => {
+						let offset = _this._inst.exports.allocate_buffer(10)
+						console.log("load value===>",mem().getUint32(offset + 0, true))
+						console.log("get_random_string",offset)
+						console.log("retBufPtr",retBufPtr)
+						console.log("retBufSize",retBufSize)
+						mem().setInt32(retBufPtr,offset, true)
+						mem().setInt32(retBufSize,10, true)
+						for(let i=0; i< 10; i++){
+							mem().setUint32(offset,i+3,true)
+							offset = offset + 4
+						}
+					},
+					// loadstream js.loadstream api read back
 					//func getKeyFromOracle() []byte
 					"getKeyFromOracle": () => {
-						let reader = fs.createReadStream(null,{fd:5})
-						// Read and display the file data on console
-						reader.on('data', function (chunk) {
-							console.log("get data from node:",chunk.toString());
-						});
-						return 23456
-						// return Buffer.from("Hello golang", 'utf8')
-						// return [
-						// 	83, 111, 109, 101, 32, 116, 101, 120, 116, 32, 104, 101, 114, 101, 46,  46,  46
-						//  ]
-						// data =  fs.readFileSync(5)
-						// console.log("read data from ---------->", data)
-						// return data
-						
+						let data = Buffer.alloc(100)
+						fs.readSync(5,data)
+						console.log("read data:", data.toString())
+						return data						
 					},
 
 					// func ticks() float64
@@ -556,6 +562,7 @@ import fs from "fs";
 		// }
 
 		const go = new Go();
+
 		WebAssembly.instantiate(fs.readFileSync("/root/now/wasm-runtime/go-test/main.wasm"), go.importObject).then((result) => {
             console.log("start runinng")
 			return go.run(result.instance);
