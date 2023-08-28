@@ -18,17 +18,18 @@ func main() {
 		for _, v := range data {
 			fmt.Println("res=====>", v)
 		}
+		fmt.Println("res=====", string(data))
 	}()
 
 	wg.Wait()
 }
 
 //export allocate_buffer
-func allocateBuffer(size uint32) *uint32 {
+func allocateBuffer(size uint32) *uint8 {
 	// Allocate the in-Wasm memory region and returns its pointer to hosts.
 	// The region is supposed to store random strings generated in hosts,
 	// meaning that this is called "inside" of get_random_string.
-	buf := make([]uint32, size)
+	buf := make([]uint8, size)
 	buf[0] = 3
 	buf[1] = 2
 	// buf[3] = 2
@@ -43,12 +44,12 @@ func allocateBuffer(size uint32) *uint32 {
 // func getKeyFromOracle() []byte
 
 //export get_random_string
-func getRandomStringRaw(retBufPtr **uint32, retBufSize *int)
+func getRandomStringRaw(retBufPtr **byte, retBufSize *uint32)
 
 // Get random string from the hosts.
-func getRandomString() []uint32 {
-	var bufPtr *uint32
-	var bufSize int
+func getRandomString() []byte {
+	var bufPtr *byte
+	var bufSize uint32
 	getRandomStringRaw(&bufPtr, &bufSize)
 	println("bufPtr in go after", *bufPtr)
 	return unsafe.Slice(bufPtr, bufSize)

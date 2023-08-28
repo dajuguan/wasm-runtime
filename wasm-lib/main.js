@@ -300,16 +300,18 @@ import fs from "fs";
 				env: {
 					//get_random_string
 					"get_random_string": (retBufPtr, retBufSize) => {
-						let offset = _this._inst.exports.allocate_buffer(10)
-						console.log("load value===>",mem().getUint32(offset + 0, true))
+						let target_str = "ab2233334444"
+						let size = target_str.length
+						let offset = _this._inst.exports.allocate_buffer(size)
+						console.log("load value===>",mem().getUint8(offset + 0, true))
 						console.log("get_random_string",offset)
 						console.log("retBufPtr",retBufPtr)
 						console.log("retBufSize",retBufSize)
-						mem().setInt32(retBufPtr,offset, true)
-						mem().setInt32(retBufSize,10, true)
-						for(let i=0; i< 10; i++){
-							mem().setUint32(offset,i+3,true)
-							offset = offset + 4
+						mem().setUint32(retBufPtr,offset, true)
+						mem().setUint32(retBufSize,size, true)
+						for(let i=0; i< size; i++){
+							mem().setUint8(offset,target_str[i].charCodeAt(0),true)
+							offset = offset + 1
 						}
 					},
 					// loadstream js.loadstream api read back
