@@ -316,11 +316,36 @@ import fs from "fs";
 					},
 					// loadstream js.loadstream api read back
 					//func getKeyFromOracle() []byte
-					"getKeyFromOracle": () => {
+					"get_preimage_from_oracle": (...args) => {
+						let key = args.slice(0,32)
+						let retBufPtr = args.slice(32,33)[0]
+						let retBufSize = args.slice(33,34)[0]
+						console.log("key",key)
+						console.log("retBufPtr",retBufPtr)
+						
+						//read preimage from file descriptor
+						let PClientRFd = 5
+						let PClientWFd = 6
+						console.log("key is:",key)
+						fs.writeSync(PClientWFd, Buffer.from(key))
 						let data = Buffer.alloc(100)
-						fs.readSync(5,data)
-						console.log("read data:", data.toString())
-						return data						
+						let bytes_len = fs.readSync(PClientRFd,data)
+						let len =  Number(data[0,8])
+						let start = bytes_len - len
+						console.log("start:", start)
+						console.log("read bytes_len:", data.subarray(start,bytes_len).length)
+						data = data.subarray(start,bytes_len)
+						console.log("read data:",  data)
+
+						//send data back to go-wasm
+						let offset = _this._inst.exports.allocate_buffer(len)
+						mem().setUint32(retBufPtr,offset, true)
+						mem().setUint32(retBufSize,len, true)
+						for(let i=0; i< len; i++){
+							mem().setUint8(offset,data[i],true)
+							offset = offset + 1
+						}
+					
 					},
 
 					// func ticks() float64
