@@ -5,17 +5,27 @@ package main
 
 import (
 	"fmt"
+	"sync"
 	"syscall/js"
 	"unsafe"
 )
 
 func main() {
-	js.Global().Set("allocate_buffer", js.FuncOf(allocateBufferFunc))
-	println("test....")
-	res := getRandomString()
-	println("getRandomString:", string(res))
 
-	fmt.Printf("getRandomString:%02x\n", res)
+	js.Global().Set("allocate_buffer", js.FuncOf(allocateBufferFunc))
+
+	var wg sync.WaitGroup
+	wg.Add(1)
+	go func() {
+		defer wg.Done()
+		res := getRandomString()
+		println("getRandomString:", string(res))
+
+		fmt.Printf("getRandomString:%02x\n", res)
+	}()
+
+	wg.Wait()
+
 }
 
 func allocateBufferFunc(this js.Value, args []js.Value) interface{} {
