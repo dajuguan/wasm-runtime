@@ -192,6 +192,10 @@
 				return new Uint8Array(this._inst.exports.mem.buffer, array, len);
 			}
 
+			const loadSliceFromOffset = (addr,len) => {
+				return new Uint8Array(this._inst.exports.mem.buffer, addr, len);
+			}
+
 			const loadSliceOfValues = (addr) => {
 				const array = getInt64(addr + 0);
 				const len = getInt64(addr + 8);
@@ -214,11 +218,13 @@
 					add: (a, b) => a + b,
 					sub: (retBufPtr, retBufSize) => {
 						console.log("called.....")
+						//test read filechan
 						let PClientRFd = 5
 						let data = Buffer.alloc(100)
 						let bytes_len = fs.readSync(PClientRFd,data)
 						console.log("read from host:", bytes_len)
 						console.log("read from host:", data.toString())
+						return 
 
 						let mem = this.mem
 						let target_str = "ab2233334444"
@@ -236,18 +242,16 @@
 						}
 					},
 					//func getKeyFromOracle() []byte
-					get_preimage_from_oracle: (...args) => {
+					get_preimage_from_oracle: (keyPtr,retBufPtr,retBufSize) => {
 						let mem = this.mem
-						let key = args.slice(0,32)
-						let retBufPtr = args.slice(32,33)[0]
-						let retBufSize = args.slice(33,34)[0]
-						
+						let key = loadSliceFromOffset(keyPtr,32)
+						console.log("key is:", key.toString())
+
 						//read preimage from file descriptor
 						let PClientRFd = 5
 						let PClientWFd = 6
-						console.log("key is:",key)
 						fs.writeSync(PClientWFd, Buffer.from(key))
-						let data = Buffer.alloc(100)
+						let data = Buffer.alloc(1000)
 						let bytes_len = fs.readSync(PClientRFd,data)
 						let len =  Number(data[0,8])
 						let start = bytes_len - len
@@ -257,11 +261,11 @@
 						console.log("read data:",  data)
 
 						//send data back to go-wasm
-						let offset = _this._inst.exports.allocate_buffer(len)
-						mem().setUint32(retBufPtr,offset, true)
-						mem().setUint32(retBufSize,len, true)
+						let offset = globalThis.allocate_buffer(len)
+						mem.setUint32(retBufPtr,offset, true)
+						mem.setUint32(retBufSize,len, true)
 						for(let i=0; i< len; i++){
-							mem().setUint8(offset,data[i],true)
+							mem.setUint8(offset,data[i],true)
 							offset = offset + 1
 						}
 					
@@ -269,7 +273,7 @@
 
 					"hint_oracle": (retBufPtr, retBufSize) => {
 						//load hintstr
-						let hintArr = loadSlice(retBufPtr,retBufSize)
+						let hintArr = loadSliceFromOffset(retBufPtr,retBufSize)
 						// console.log("hintArr:",hintArr)
 						// console.log("hintStr:::",Buffer.from(hintArr))
 						console.log("hintStr:::",Buffer.from(hintArr).toString())

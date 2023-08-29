@@ -4,6 +4,7 @@
 package main
 
 import (
+	"encoding/binary"
 	"fmt"
 	"sync"
 	"syscall/js"
@@ -18,10 +19,18 @@ func main() {
 	wg.Add(1)
 	go func() {
 		defer wg.Done()
-		res := getRandomString()
-		println("getRandomString:", string(res))
+		// res := getRandomString()
+		// println("getRandomString:", string(res))
+		// fmt.Printf("getRandomString:%02x\n", res)
 
-		fmt.Printf("getRandomString:%02x\n", res)
+		// var key [32]byte
+		// str := "0100000000000000000000000000000000000000000000000000000000000001"
+		// b, _ := hex.DecodeString(str)
+		// copy(key[:], b)
+		// getPreimage(key)
+
+		hintHash := "l1-block-header 0x204f815790ca3bb43526ad60ebcc64784ec809bdc3550e82b54a0172f981efab"
+		getHint(hintHash)
 	}()
 
 	wg.Wait()
@@ -58,3 +67,26 @@ func getRandomString() []byte {
 	res := unsafe.Slice(bufPtr, bufSize)
 	return res
 }
+
+func getPreimage(key [32]byte) {
+	var bufPtr *byte
+	var bufSize uint32
+	getPreimageFromOracle(uint32(uintptr(unsafe.Pointer(&key[0]))), uint32(uintptr(unsafe.Pointer(&bufPtr))), uint32(uintptr(unsafe.Pointer(&bufSize))))
+	res := unsafe.Slice(bufPtr, bufSize)
+	fmt.Printf("received: %02x", res)
+}
+
+//go:wasmimport _gotest get_preimage_from_oracle
+func getPreimageFromOracle(keyPtr uint32, retBufPtr uint32, retBufSize uint32)
+
+func getHint(hint string) {
+	var hintBytes []byte
+	hintBytes = binary.BigEndian.AppendUint32(hintBytes, uint32(len(hint)))
+	hintBytes = append(hintBytes, []byte(hint)...)
+	println("hintbytes in go:", len(hintBytes))
+	fmt.Printf("hintbytes in go:%02x", hintBytes)
+	hintOracle(uint32(uintptr(unsafe.Pointer(&hintBytes[0]))), uint32(len(hintBytes)))
+}
+
+//go:wasmimport _gotest hint_oracle
+func hintOracle(retBufPtr uint32, retBufSize uint32)
