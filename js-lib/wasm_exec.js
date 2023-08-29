@@ -253,7 +253,11 @@
 						fs.writeSync(PClientWFd, Buffer.from(key))
 						let data = Buffer.alloc(1000)
 						let bytes_len = fs.readSync(PClientRFd,data)
-						let len =  Number(data[0,8])
+						console.log("bytes_len:", bytes_len)
+						console.log("data:", data)
+						let len =  data.subarray(7,8)
+						len = parseInt(len.toString("hex"),16)
+						console.log("len:", len)
 						let start = bytes_len - len
 						console.log("start:", start)
 						console.log("read bytes_len:", data.subarray(start,bytes_len).length)

@@ -5,6 +5,7 @@ package main
 
 import (
 	"encoding/binary"
+	"encoding/hex"
 	"fmt"
 	"sync"
 	"syscall/js"
@@ -23,14 +24,14 @@ func main() {
 		// println("getRandomString:", string(res))
 		// fmt.Printf("getRandomString:%02x\n", res)
 
-		// var key [32]byte
-		// str := "0100000000000000000000000000000000000000000000000000000000000001"
-		// b, _ := hex.DecodeString(str)
-		// copy(key[:], b)
-		// getPreimage(key)
+		var key [32]byte
+		str := "0100000000000000000000000000000000000000000000000000000000000006"
+		b, _ := hex.DecodeString(str)
+		copy(key[:], b)
+		getPreimage(key)
 
-		hintHash := "l1-block-header 0x204f815790ca3bb43526ad60ebcc64784ec809bdc3550e82b54a0172f981efab"
-		getHint(hintHash)
+		// hintHash := "l1-block-header 0x204f815790ca3bb43526ad60ebcc64784ec809bdc3550e82b54a0172f981efab"
+		// getHint(hintHash)
 	}()
 
 	wg.Wait()
