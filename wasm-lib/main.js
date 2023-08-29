@@ -300,6 +300,7 @@ import fs from "fs";
 				env: {
 					//get_random_string
 					"get_random_string": (retBufPtr, retBufSize) => {
+						return "Hello!"
 						let target_str = "ab2233334444"
 						let size = target_str.length
 						let offset = _this._inst.exports.allocate_buffer(size)
@@ -320,8 +321,6 @@ import fs from "fs";
 						let key = args.slice(0,32)
 						let retBufPtr = args.slice(32,33)[0]
 						let retBufSize = args.slice(33,34)[0]
-						console.log("key",key)
-						console.log("retBufPtr",retBufPtr)
 						
 						//read preimage from file descriptor
 						let PClientRFd = 5
@@ -350,11 +349,9 @@ import fs from "fs";
 
 					"hint_oracle": (retBufPtr, retBufSize) => {
 						//load hintstr
-						console.log("retBufPtr",retBufPtr)
-						console.log("retBufSize",retBufSize)
 						let hintArr = loadSlice(retBufPtr,retBufSize)
-						console.log("hintArr:",hintArr)
-						console.log("hintStr:::",Buffer.from(hintArr))
+						// console.log("hintArr:",hintArr)
+						// console.log("hintStr:::",Buffer.from(hintArr))
 						console.log("hintStr:::",Buffer.from(hintArr).toString())
 						
 						//write hint to file descriptor
