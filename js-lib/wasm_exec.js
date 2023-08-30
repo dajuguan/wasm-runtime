@@ -251,9 +251,17 @@
 						let PClientRFd = 5
 						let PClientWFd = 6
 						fs.writeSync(PClientWFd, Buffer.from(key))
+
+						// let test_buf = Buffer.alloc(800)
+						// fs.readSync(PClientRFd,test_buf)
+						// console.log("test_buff:",test_buf)
+						// console.log("test_buff:",test_buf.toString("hex"))
+						// return 0
+
 						//write to go-wasm
 						let lenBuf = Buffer.alloc(8)
 						fs.readSync(PClientRFd,lenBuf,0,8)
+						// console.log("lenBuf====>",lenBuf)
 						let len = parseInt(lenBuf.toString("hex"),16)
 						console.log("len js:", len)
 						return len
@@ -264,18 +272,37 @@
 						let mem = this.mem
 						let PClientRFd = 5
 						let key = loadSliceFromOffset(keyPtr,32)
-						console.log("key is:", key.toString())
+						// console.log("key is:", key.toString())
 
 						let data = Buffer.alloc(len)
 						fs.readSync(PClientRFd,data)
-						console.log("read data:",  data)
+						console.log("read data:",  data.subarray(0,32))
 
 						//send data back to go-wasm
-						// len = 140
-						// data = data.subarray(0,len)
 						for(let i=0; i< len; i++){
 							mem.setUint8(offset,data[i],true)
 							offset = offset + 1
+						}
+
+						//flush 
+						if( len > 50000){
+							let key = new Buffer("0100000000000000000000000000000000000000000000000000000000000001", 'hex');
+							console.log("dummy key is=====>:", key)
+							//read preimage from file descriptor
+							let PClientRFd = 5
+							let PClientWFd = 6
+							fs.writeSync(PClientWFd, key)
+	
+							// let test_buf = Buffer.alloc(800)
+							// fs.readSync(PClientRFd,test_buf)
+							// console.log("test_buff:",test_buf)
+							// console.log("test_buff:",test_buf.toString("hex"))
+							// return 0
+	
+							//write to go-wasm
+							let lenBuf = Buffer.alloc(40)
+							fs.readSync(PClientRFd,lenBuf)
+							console.log("dummy lenBuf======>",lenBuf)
 						}
 					
 					},
@@ -285,12 +312,12 @@
 						let hintArr = loadSliceFromOffset(retBufPtr,retBufSize)
 						// console.log("hintArr:",hintArr)
 						// console.log("hintStr:::",Buffer.from(hintArr))
-						console.log("hintStr:::",Buffer.from(hintArr).toString())
+						// console.log("hintStr:::",Buffer.from(hintArr).toString())
 						
 						//write hint to file descriptor
 						let HClientWFd = 4
 						let number = fs.writeSync(HClientWFd, Buffer.from(hintArr))
-						console.log("write hint to host server:", number)
+						// console.log("write hint to host server:", number)
 					},
 				},
 				gojs: {

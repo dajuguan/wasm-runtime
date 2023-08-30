@@ -5,6 +5,7 @@ package main
 
 import (
 	"encoding/binary"
+	"encoding/hex"
 	"fmt"
 	"sync"
 	"unsafe"
@@ -19,14 +20,29 @@ func main() {
 		// println("getRandomString:", string(res))
 		// fmt.Printf("getRandomString:%02x\n", res)
 
-		// var key [32]byte
-		// str := "0100000000000000000000000000000000000000000000000000000000000006"
-		// b, _ := hex.DecodeString(str)
+		var key [32]byte
+
+		// str := "0100000000000000000000000000000000000000000000000000000000000001"
+		str := "02f26283bdbd7992320d4d707dfa940095f638ad7c95d115150fb2a4417c3ad1"
+		b, _ := hex.DecodeString(str)
+		copy(key[:], b)
+		getPreimage(key)
+
+		for i := 0; i < 5; i++ {
+			str = "02a2b2ac180c92e0af73975c89261fb8e7fb0e10cb159a3c09883aaa812f3d68"
+			b, _ := hex.DecodeString(str)
+			copy(key[:], b)
+			buf := getPreimage(key)
+			fmt.Printf("received: %02x \n", buf[0:8])
+		}
+
+		// str = "02a2b2ac180c92e0af73975c89261fb8e7fb0e10cb159a3c09883aaa812f3d68"
+		// b, _ = hex.DecodeString(str)
 		// copy(key[:], b)
 		// getPreimage(key)
 
-		hintHash := "l1-block-header 0x204f815790ca3bb43526ad60ebcc64784ec809bdc3550e82b54a0172f981efab"
-		getHint(hintHash)
+		// hintHash := "l1-block-header 0x204f815790ca3bb43526ad60ebcc64784ec809bdc3550e82b54a0172f981efab"
+		// getHint(hintHash)
 	}()
 
 	wg.Wait()
@@ -46,13 +62,21 @@ func getRandomString() []byte {
 	return res
 }
 
-func getPreimage(key [32]byte) {
+func getPreimage(key [32]byte) []byte {
 	size := getPreimageLenFromOracle(uint32(uintptr(unsafe.Pointer(&key[0]))))
 	println("len go", size)
 
 	buf := make([]byte, size)
 	getPreimageFromOracle(uint32(uintptr(unsafe.Pointer(&key[0]))), uint32(uintptr(unsafe.Pointer(&buf[0]))), size)
-	fmt.Printf("received: %02x \n", buf)
+	if size > 80000 {
+		var key [32]byte
+		str := "0100000000000000000000000000000000000000000000000000000000000001"
+		b, _ := hex.DecodeString(str)
+		copy(key[:], b)
+		getPreimageFromOracle(uint32(uintptr(unsafe.Pointer(&key[0]))), uint32(uintptr(unsafe.Pointer(&buf[0]))), 32)
+		println("for skip=================>")
+	}
+	return buf
 }
 
 //go:wasmimport _gotest get_preimage_len
