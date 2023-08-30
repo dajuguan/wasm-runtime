@@ -221,29 +221,29 @@
 						//test read filechan
 						let PClientRFd = 5
 						let data = Buffer.alloc(100)
-						let bytes_len = fs.readSync(PClientRFd,data)
+						let bytes_len = fs.readSync(PClientRFd,data,0,8)
 						console.log("read from host:", bytes_len)
 						console.log("read from host:", data.toString())
 						return 
 
-						let mem = this.mem
-						let target_str = "ab2233334444"
-						let size = target_str.length
-						let offset = globalThis.allocate_buffer(size)
-						console.log("load value===>",mem.getUint8(offset + 0, true))
-						console.log("get_random_string",offset)
-						console.log("retBufPtr",retBufPtr)
-						console.log("retBufSize",retBufSize)
-						mem.setUint32(retBufPtr,offset, true)
-						mem.setUint32(retBufSize,size, true)
-						for(let i=0; i< size; i++){
-							mem.setUint8(offset,target_str[i].charCodeAt(0),true)
-							offset = offset + 1
-						}
+						// let mem = this.mem
+						// let target_str = "ab2233334444"
+						// let size = target_str.length
+						// let offset = globalThis.allocate_buffer(size)
+						// console.log("load value===>",mem.getUint8(offset + 0, true))
+						// console.log("get_random_string",offset)
+						// console.log("retBufPtr",retBufPtr)
+						// console.log("retBufSize",retBufSize)
+						// mem.setUint32(retBufPtr,offset, true)
+						// mem.setUint32(retBufSize,size, true)
+						// for(let i=0; i< size; i++){
+						// 	mem.setUint8(offset,target_str[i].charCodeAt(0),true)
+						// 	offset = offset + 1
+						// }
 					},
-					//func getKeyFromOracle() []byte
-					get_preimage_from_oracle: (keyPtr,retBufPtr,retBufSize) => {
-						let mem = this.mem
+
+					//func get_preimage_len
+					get_preimage_len: (keyPtr) => {
 						let key = loadSliceFromOffset(keyPtr,32)
 						console.log("key is:", key.toString())
 
@@ -251,23 +251,28 @@
 						let PClientRFd = 5
 						let PClientWFd = 6
 						fs.writeSync(PClientWFd, Buffer.from(key))
-						let data = Buffer.alloc(1000)
-						let bytes_len = fs.readSync(PClientRFd,data)
-						console.log("bytes_len:", bytes_len)
-						console.log("data:", data)
-						let len =  data.subarray(7,8)
-						len = parseInt(len.toString("hex"),16)
-						console.log("len:", len)
-						let start = bytes_len - len
-						console.log("start:", start)
-						console.log("read bytes_len:", data.subarray(start,bytes_len).length)
-						data = data.subarray(start,bytes_len)
+						//write to go-wasm
+						let lenBuf = Buffer.alloc(8)
+						fs.readSync(PClientRFd,lenBuf,0,8)
+						let len = parseInt(lenBuf.toString("hex"),16)
+						console.log("len js:", len)
+						return len
+					},
+
+					//func getKeyFromOracle() []byte
+					get_preimage_from_oracle: (keyPtr,offset,len) => {
+						let mem = this.mem
+						let PClientRFd = 5
+						let key = loadSliceFromOffset(keyPtr,32)
+						console.log("key is:", key.toString())
+
+						let data = Buffer.alloc(len)
+						fs.readSync(PClientRFd,data)
 						console.log("read data:",  data)
 
 						//send data back to go-wasm
-						let offset = globalThis.allocate_buffer(len)
-						mem.setUint32(retBufPtr,offset, true)
-						mem.setUint32(retBufSize,len, true)
+						// len = 140
+						// data = data.subarray(0,len)
 						for(let i=0; i< len; i++){
 							mem.setUint8(offset,data[i],true)
 							offset = offset + 1
@@ -296,9 +301,6 @@
 
 					// func wasmExit(code int32)
 					"runtime.wasmExit": (sp) => {
-						// let res = globalThis.allocate_buffer(10)
-						// console.log("allocate_buffer>>>>",res)
-						// 
 						sp >>>= 0;
 						const code = this.mem.getInt32(sp + 8, true);
 						this.exited = true;
