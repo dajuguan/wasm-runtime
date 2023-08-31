@@ -245,7 +245,7 @@
 					//func get_preimage_len
 					get_preimage_len: (keyPtr) => {
 						let key = loadSliceFromOffset(keyPtr,32)
-						console.log("key is:", key.toString())
+						// console.log("key is:", key.toString())
 
 						//read preimage from file descriptor
 						let PClientRFd = 5
@@ -263,7 +263,7 @@
 						fs.readSync(PClientRFd,lenBuf,0,8)
 						// console.log("lenBuf====>",lenBuf)
 						let len = parseInt(lenBuf.toString("hex"),16)
-						console.log("len js:", len)
+						// console.log("len js:", len)
 						return len
 					},
 
@@ -274,36 +274,18 @@
 						let key = loadSliceFromOffset(keyPtr,32)
 						// console.log("key is:", key.toString())
 
+						// console.log("len=======>",len)
 						let data = Buffer.alloc(len)
-						fs.readSync(PClientRFd,data)
-						console.log("read data:",  data.subarray(0,32))
+						let readed_len = fs.readSync(PClientRFd,data)
+						// console.log("read length",readed_len)
+						// console.log("read data:",  data.subarray(0,32))
 
 						//send data back to go-wasm
-						for(let i=0; i< len; i++){
+						for(let i=0; i< readed_len; i++){
 							mem.setUint8(offset,data[i],true)
 							offset = offset + 1
 						}
-
-						//flush 
-						if( len > 50000){
-							let key = new Buffer("0100000000000000000000000000000000000000000000000000000000000001", 'hex');
-							console.log("dummy key is=====>:", key)
-							//read preimage from file descriptor
-							let PClientRFd = 5
-							let PClientWFd = 6
-							fs.writeSync(PClientWFd, key)
-	
-							// let test_buf = Buffer.alloc(800)
-							// fs.readSync(PClientRFd,test_buf)
-							// console.log("test_buff:",test_buf)
-							// console.log("test_buff:",test_buf.toString("hex"))
-							// return 0
-	
-							//write to go-wasm
-							let lenBuf = Buffer.alloc(40)
-							fs.readSync(PClientRFd,lenBuf)
-							console.log("dummy lenBuf======>",lenBuf)
-						}
+						return readed_len
 					
 					},
 
@@ -575,6 +557,11 @@
 			}
 			this._inst = instance;
 			this.mem = new DataView(this._inst.exports.mem.buffer);
+			this.mem =  new DataView(new WebAssembly.Memory({
+				initial: 20,
+				maximum: 160,
+				shared: true,
+			  }).buffer)
 			this._values = [ // JS values that Go currently has references to, indexed by reference id
 				NaN,
 				0,
@@ -633,7 +620,9 @@
 
 			// The linker guarantees global data starts from at least wasmMinDataAddr.
 			// Keep in sync with cmd/link/internal/ld/data.go:wasmMinDataAddr.
-			const wasmMinDataAddr = 4096 + 8192;
+			// const wasmMinDataAddr = 4096 + 8192;
+			const wasmMinDataAddr = 4096 + 8192 + 81920;
+
 			if (offset >= wasmMinDataAddr) {
 				throw new Error("total length of command line and environment variables exceeds limit");
 			}

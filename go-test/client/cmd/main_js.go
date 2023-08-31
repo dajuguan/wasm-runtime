@@ -23,7 +23,9 @@ func main() {
 		var key [32]byte
 
 		// str := "0100000000000000000000000000000000000000000000000000000000000001"
+		// big hostio
 		str := "02f26283bdbd7992320d4d707dfa940095f638ad7c95d115150fb2a4417c3ad1"
+		// str := "02dc1ac76a8d07580017d3d2120f6fae69df22c4709be4aeaa9aade4990a482e"
 		b, _ := hex.DecodeString(str)
 		copy(key[:], b)
 		getPreimage(key)
@@ -62,20 +64,31 @@ func getRandomString() []byte {
 	return res
 }
 
+func min(a, b uint32) uint32 {
+	if a > b {
+		return b
+	}
+	return a
+}
+
 func getPreimage(key [32]byte) []byte {
 	size := getPreimageLenFromOracle(uint32(uintptr(unsafe.Pointer(&key[0]))))
 	println("len go", size)
 
+	// size = min(size, uint32(65500))
 	buf := make([]byte, size)
-	getPreimageFromOracle(uint32(uintptr(unsafe.Pointer(&key[0]))), uint32(uintptr(unsafe.Pointer(&buf[0]))), size)
-	if size > 80000 {
-		var key [32]byte
-		str := "0100000000000000000000000000000000000000000000000000000000000001"
-		b, _ := hex.DecodeString(str)
-		copy(key[:], b)
-		getPreimageFromOracle(uint32(uintptr(unsafe.Pointer(&key[0]))), uint32(uintptr(unsafe.Pointer(&buf[0]))), 32)
-		println("for skip=================>")
+	readedLen := getPreimageFromOracle(uint32(uintptr(unsafe.Pointer(&key[0]))), uint32(uintptr(unsafe.Pointer(&buf[0]))), size)
+	if readedLen < size {
+		getPreimageFromOracle(uint32(uintptr(unsafe.Pointer(&key[0]))), uint32(uintptr(unsafe.Pointer(&buf[readedLen]))), size-readedLen)
 	}
+	// if size > 80000 {
+	// 	var key [32]byte
+	// 	str := "0100000000000000000000000000000000000000000000000000000000000001"
+	// 	b, _ := hex.DecodeString(str)
+	// 	copy(key[:], b)
+	// 	getPreimageFromOracle(uint32(uintptr(unsafe.Pointer(&key[0]))), uint32(uintptr(unsafe.Pointer(&buf[0]))), 32)
+	// 	println("for skip=================>")
+	// }
 	return buf
 }
 
@@ -83,7 +96,7 @@ func getPreimage(key [32]byte) []byte {
 func getPreimageLenFromOracle(keyPtr uint32) uint32
 
 //go:wasmimport _gotest get_preimage_from_oracle
-func getPreimageFromOracle(keyPtr uint32, retBufPtr uint32, size uint32)
+func getPreimageFromOracle(keyPtr uint32, retBufPtr uint32, size uint32) uint32
 
 func getHint(hint string) {
 	var hintBytes []byte
