@@ -1,5 +1,5 @@
-//go:build js && !wasm
-// +build js,!wasm
+//go:build js || wasm
+// +build js wasm
 
 package main
 
@@ -30,21 +30,21 @@ func main() {
 		copy(key[:], b)
 		getPreimage(key)
 
-		for i := 0; i < 5; i++ {
-			str = "02a2b2ac180c92e0af73975c89261fb8e7fb0e10cb159a3c09883aaa812f3d68"
-			b, _ := hex.DecodeString(str)
-			copy(key[:], b)
-			buf := getPreimage(key)
-			fmt.Printf("received: %02x \n", buf[0:8])
-		}
+		// for i := 0; i < 5; i++ {
+		// 	str = "02a2b2ac180c92e0af73975c89261fb8e7fb0e10cb159a3c09883aaa812f3d68"
+		// 	b, _ := hex.DecodeString(str)
+		// 	copy(key[:], b)
+		// 	buf := getPreimage(key)
+		// 	fmt.Printf("received: %02x \n", buf[0:8])
+		// }
 
 		// str = "02a2b2ac180c92e0af73975c89261fb8e7fb0e10cb159a3c09883aaa812f3d68"
 		// b, _ = hex.DecodeString(str)
 		// copy(key[:], b)
 		// getPreimage(key)
 
-		// hintHash := "l1-block-header 0x204f815790ca3bb43526ad60ebcc64784ec809bdc3550e82b54a0172f981efab"
-		// getHint(hintHash)
+		hintHash := "l1-block-header 0x204f815790ca3bb43526ad60ebcc64784ec809bdc3550e82b54a0172f981efab"
+		getHint(hintHash)
 	}()
 
 	wg.Wait()

@@ -245,7 +245,7 @@
 					//func get_preimage_len
 					get_preimage_len: (keyPtr) => {
 						let key = loadSliceFromOffset(keyPtr,32)
-						// console.log("key is:", key.toString())
+						console.log("key is:", key.toString())
 
 						//read preimage from file descriptor
 						let PClientRFd = 5
@@ -278,7 +278,7 @@
 						let data = Buffer.alloc(len)
 						let readed_len = fs.readSync(PClientRFd,data)
 						// console.log("read length",readed_len)
-						// console.log("read data:",  data.subarray(0,32))
+						console.log("read data:",  data.subarray(0,32))
 
 						//send data back to go-wasm
 						for(let i=0; i< readed_len; i++){

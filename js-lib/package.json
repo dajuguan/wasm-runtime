@@ -3,7 +3,6 @@
   "version": "1.0.0",
   "description": "wasm-runtime test",
   "main": "index.js",
-  "type":"module",
   "directories": {
     "lib": "lib"
   },
