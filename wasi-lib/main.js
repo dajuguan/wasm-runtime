@@ -36,7 +36,7 @@ import fs from "fs"
         //write to go-wasm
         let lenBuf = Buffer.alloc(8)
         fs.readSync(PClientRFd,lenBuf,0,8)
-        // console.log("lenBuf====>",lenBuf)
+        console.log("lenBuf====>",lenBuf)
         let len = parseInt(lenBuf.toString("hex"),16)
         // console.log("len js:", len)
         return len
@@ -59,6 +59,7 @@ import fs from "fs"
           mem.setUint8(offset,data[i],true)
           offset = offset + 1
         }
+        console.log("data.subarray(0,8)",data.subarray(0,8))
         return readed_len
       
       },

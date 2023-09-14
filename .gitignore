@@ -136,3 +136,4 @@ dist
 go-test/main
 go-test/main.*
 go-test/cmd/client.*
+go-test/cmd/*.wasi

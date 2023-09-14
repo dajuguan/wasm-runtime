@@ -1,12 +1,8 @@
-//go:build wasp1
-// +build wasp1
-
 package main
 
 import (
 	"encoding/binary"
 	"encoding/hex"
-	"fmt"
 	"sync"
 	"unsafe"
 )
@@ -20,10 +16,9 @@ func main() {
 		// println("getRandomString:", string(res))
 		// fmt.Printf("getRandomString:%02x\n", res)
 
-		// var key [32]byte
+		var key [32]byte
 
 		str := "0100000000000000000000000000000000000000000000000000000000000001"
-		println("hhh", str)
 		// big hostio
 		// str := "02f26283bdbd7992320d4d707dfa940095f638ad7c95d115150fb2a4417c3ad1"
 		// str := "02dc1ac76a8d07580017d3d2120f6fae69df22c4709be4aeaa9aade4990a482e"
@@ -75,7 +70,7 @@ func min(a, b uint32) uint32 {
 
 func getPreimage(key [32]byte) []byte {
 	size := getPreimageLenFromOracle(uint32(uintptr(unsafe.Pointer(&key[0]))))
-	println("len go", size)
+	// println("len go", size)
 
 	// size = min(size, uint32(65500))
 	buf := make([]byte, size)
@@ -83,8 +78,8 @@ func getPreimage(key [32]byte) []byte {
 	if readedLen < size {
 		getPreimageFromOracle(uint32(uintptr(unsafe.Pointer(&key[0]))), uint32(uintptr(unsafe.Pointer(&buf[readedLen]))), size-readedLen)
 	}
-	fmt.Printf("buf first:%02x\n", buf[0:8])
-	fmt.Printf("buf last:%02x\n", buf[size-8:size])
+	// println("buf first", buf[0:8])
+	// println("buf last", buf[size-8:size])
 	return buf
 }
 
