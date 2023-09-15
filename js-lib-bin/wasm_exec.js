@@ -214,30 +214,55 @@
 
 			const timeOrigin = Date.now() - performance.now();
 
-			let preimages = fs.readFileSync("/root/now/optimism/op-program/bin/preimages_cp.bin")
-			let cur = 0
-			let next_cur = 0
-			let wasm_input_state = 0
+			let preimage_state_pub = {
+				preimages: fs.readFileSync("/root/now/optimism/op-program/bin/preimages_pub.bin"),
+				cur: 0,
+				next_cur: 0,
+				input_state:0
+			}
+			let preimage_state_prv = {
+				preimages: fs.readFileSync("/root/now/optimism/op-program/bin/preimages_prv.bin"),
+				cur: 0,
+				next_cur: 0,
+				input_state:0
+			}
+			function genOut(state) {
+				let preimages = state.preimages
+				let data = preimages.readBigInt64BE(state.cur)
+				state.cur += 8
+				return data
+
+				// if(state.input_state == 0){
+				// 	state.cur += 8
+				// 	state.next_cur = state.cur + Number(length)
+				// 	state.input_state = 1
+				// 	// if(length == 847){
+				// 	// 	let end = state.cur + 847
+				// 	// 	let data = preimages.subarray(end-8, end)
+				// 	// 	console.log("data ===>",data) //when length == 847 623931643630227d
+				// 	// }
+				// 	return length
+				// }
+				// let _min = Math.min(state.cur+8, state.next_cur)
+				// let hex_data = preimages.subarray(state.cur,_min).toString('hex')
+				// let data = BigInt(`0x${hex_data}`)
+				// state.cur = _min
+				// if (state.cur  == state.next_cur) {
+				// 	state.input_state = 0
+				// 	state.cur = state.next_cur
+				// }
+				// return data
+			}
 			this.importObject = {
 				env: {
 					wasm_input: (ispulic) => {
-						if(wasm_input_state == 0) {
-							let length = preimages.readBigInt64BE(cur)
-							console.log("length:",length)
-							cur += 8
-							next_cur = cur + Number(length)
-							wasm_input_state = 1
-							return length
+						return ispulic ? genOut(preimage_state_pub) : genOut(preimage_state_prv)
+					},
+					require: (cond) => {
+						if (cond == 0) {
+						  console.log("require is not satisfied, which is a false assertion in the wasm code. Please check the logic of your image or input.");
+						  process.exit(1);
 						}
-
-						let _min = Math.min(cur+8, preimages.length)
-						let data = BigInt(`0x${ preimages.subarray(cur,_min).toString('hex')}`)
-						cur +=8 
-						if (cur >= next_cur) {
-							wasm_input_state = 0
-							cur = next_cur
-						}
-						return data
 					}
 				},
 				_gotest: {

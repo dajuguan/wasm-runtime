@@ -4,29 +4,11 @@ import (
 	"encoding/binary"
 	"fmt"
 	"os"
-	"reflect"
 )
 
 func main() {
-
-	data := make([]byte, 10)
-	data[0] = 32
-	data[1] = 79
-	data[2] = 129
-	data[3] = 87
-	data[4] = 144
-	data[5] = 202
-	data[6] = 59
-	data[7] = 180
-
-	// writeFile("junk.bin", data)
-	readFile("junk.bin")
-
-	b := make([]byte, 2)
-	b[0] = 32
-	b[1] = 78
-	fmt.Println(reflect.DeepEqual(data[0:2], b))
-	fmt.Printf("data:%x\n", data)
+	a := 15
+	println(a % 8)
 }
 
 func readFile(fileName string) {
